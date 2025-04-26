@@ -1,14 +1,18 @@
 import { defineStore } from 'pinia'
 import Papa from 'papaparse'
 
-// Import media files with correct base path
+// Import media files with correct base path, using relative path
 const mediaFiles = Object.fromEntries(
-  Object.entries(import.meta.glob('/data/**/*.{mp4,png,jpg,jpeg,webm}', { eager: true }))
-    .map(([key, value]) => [key.toLowerCase(), key])
+  Object.entries(import.meta.glob('../data/**/*.{mp4,png,jpg,jpeg,webm}', { eager: true }))
+    .map(([key, value]) => {
+      // Extract just the filename from the path
+      const filename = key.split('/').pop();
+      return [filename.toLowerCase(), key];
+    })
 );
 
 // Import CSV data
-import itemsData from '/data/items.csv?raw'
+import itemsData from '../data/items.csv?raw'
 
 export const useArchiveStore = defineStore('archive', {
   state: () => ({
@@ -95,19 +99,16 @@ export const useArchiveStore = defineStore('archive', {
         });
         
         this.items = data.map(row => {
-          // Parse tags - they might be in multiple lines in the CSV
           const tags = row.Tags ? 
             row.Tags.split(/[\n,]/)
               .map(tag => tag.trim())
               .filter(Boolean) : 
             [];
 
-          // Find matching media file
+          // Just look for the filename itself
           const searchName = row.VisualName.toLowerCase();
-          const searchType = row.Type.toLowerCase();
-          const filePath = Object.keys(mediaFiles).find(path => 
-            path.includes(`/${searchType}/`) && 
-            path.includes(searchName)
+          const filePath = Object.keys(mediaFiles).find(filename => 
+            filename.includes(searchName)
           );
 
           return {
