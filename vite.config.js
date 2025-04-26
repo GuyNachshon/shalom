@@ -10,7 +10,7 @@ export default defineConfig({
       '@': '/src',
     },
   },
-  assetsInclude: ['**/*.csv'],
+  publicDir: 'data',
   build: {
     outDir: 'dist',
     copyPublicDir: true,

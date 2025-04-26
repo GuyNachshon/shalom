@@ -1,18 +1,14 @@
 import { defineStore } from 'pinia'
 import Papa from 'papaparse'
 
-// Import media files with correct base path, using relative path
+// Import media files with correct base path
 const mediaFiles = Object.fromEntries(
-  Object.entries(import.meta.glob('../data/**/*.{mp4,png,jpg,jpeg,webm}', { eager: true }))
-    .map(([key, value]) => {
-      // Extract just the filename from the path
-      const filename = key.split('/').pop();
-      return [filename.toLowerCase(), key];
-    })
+  Object.entries(import.meta.glob('../../data/**/*.{mp4,png,jpg,jpeg,webm}', { eager: true }))
+    .map(([key, value]) => [key.toLowerCase(), key])
 );
 
 // Import CSV data
-import itemsData from '../data/items.csv?raw'
+const itemsData = await fetch('/items.csv').then(res => res.text());
 
 export const useArchiveStore = defineStore('archive', {
   state: () => ({
