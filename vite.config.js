@@ -11,23 +11,36 @@ export default defineConfig({
     },
   },
   assetsInclude: ['**/*.csv', '**/*.mp4', '**/*.png'],
-  publicDir: 'data',
   build: {
     outDir: 'dist',
-    copyPublicDir: true,
+    copyPublicDir: false,
     rollupOptions: {
       input: {
         main: 'index.html',
       },
       output: {
         assetFileNames: (assetInfo) => {
-          // Skip files that are handled by copyPublicDir
+          const info = assetInfo.name?.split('.');
+          const ext = info?.[info.length - 1] ?? '';
+
+          // Handle fonts and other assets
           if (assetInfo.name?.includes('node_modules') || 
               assetInfo.name?.includes('src/assets')) {
-            return 'assets/[name]-[hash][extname]';
+            return `assets/[name]-[hash][extname]`;
           }
-          // Keep original path for everything else
-          return '[name][extname]';
+
+          // Handle data files
+          if (assetInfo.name?.includes('data/')) {
+            return assetInfo.name;
+          }
+
+          // Handle media files
+          if (['mp4', 'png'].includes(ext)) {
+            const type = assetInfo.name?.includes('DOVE') ? 'dove' : 'hawk';
+            return `data/1979/${type}/[name][extname]`;
+          }
+
+          return `assets/[name]-[hash][extname]`;
         },
       },
     },
