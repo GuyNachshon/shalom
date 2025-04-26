@@ -10,5 +10,6 @@ export default defineConfig({
     },
   },
   assetsInclude: ['**/*.csv'],
-  publicDir: 'data'
+  publicDir: 'data',
+  base: '/shalom/'
 })
