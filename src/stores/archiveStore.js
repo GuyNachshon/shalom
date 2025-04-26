@@ -3,12 +3,15 @@ import Papa from 'papaparse'
 
 // Import media files with correct base path
 const mediaFiles = Object.fromEntries(
-  Object.entries(import.meta.glob('../../data/**/*.{mp4,png,jpg,jpeg,webm}', { eager: true }))
-    .map(([key, value]) => [key.toLowerCase(), key])
+  Object.entries(import.meta.glob('/data/**/*.{mp4,png,jpg,jpeg,webm}', { eager: true }))
+    .map(([key, value]) => {
+      const filename = key.split('/').pop();
+      return [filename.toLowerCase(), key];
+    })
 );
 
 // Import CSV data
-const itemsData = await fetch('/items.csv').then(res => res.text());
+import itemsData from '/data/items.csv?raw'
 
 export const useArchiveStore = defineStore('archive', {
   state: () => ({
