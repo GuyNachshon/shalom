@@ -10,10 +10,10 @@ export default defineConfig({
       '@': '/src',
     },
   },
-  assetsInclude: ['**/*.csv', '**/*.mp4', '**/*.png'],
+  assetsInclude: ['**/*.csv', '**/*.mp4', '**/*.png', '**/*.woff2'],
   build: {
     outDir: 'dist',
-    copyPublicDir: false,
+    copyPublicDir: true,
     rollupOptions: {
       input: {
         main: 'index.html',
@@ -23,15 +23,20 @@ export default defineConfig({
           const info = assetInfo.name?.split('.');
           const ext = info?.[info.length - 1] ?? '';
 
-          // Handle fonts and other assets
+          // Handle CSV files
+          if (ext === 'csv') {
+            return `data/[name][extname]`;
+          }
+
+          // Handle fonts
+          if (ext === 'woff2') {
+            return `assets/fonts/[name][extname]`;
+          }
+
+          // Handle other assets
           if (assetInfo.name?.includes('node_modules') || 
               assetInfo.name?.includes('src/assets')) {
             return `assets/[name]-[hash][extname]`;
-          }
-
-          // Handle data files
-          if (assetInfo.name?.includes('data/')) {
-            return assetInfo.name;
           }
 
           // Handle media files

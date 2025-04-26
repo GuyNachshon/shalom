@@ -6,7 +6,7 @@ const mediaFiles = Object.fromEntries(
   Object.entries(import.meta.glob('/data/**/*.{mp4,png,jpg,jpeg,webm}', { eager: true }))
     .map(([key, value]) => {
       const filename = key.split('/').pop();
-      return [filename.toLowerCase(), key];
+      return [filename?.toLowerCase(), key];
     })
 );
 
@@ -23,16 +23,16 @@ export const useArchiveStore = defineStore('archive', {
   }),
   
   getters: {
-    doveItems: (state) => state.items.filter(item => item.type === 'Dove'),
-    hawkItems: (state) => state.items.filter(item => item.type === 'Hawk'),
+    doveItems: (state) => state.items.filter(item => item.type === 'DOVE'),
+    hawkItems: (state) => state.items.filter(item => item.type === 'HAWK'),
     itemsByYear: (state) => (year) => state.items.filter(item => item.year === year),
     itemsByTag: (state) => (tag) => state.items.filter(item => item.tags.includes(tag)),
     years: (state) => [...new Set(state.items.map(item => item.year))].sort(),
     allTags: (state) => [...new Set(state.items.flatMap(item => item.tags))].sort(),
     sortedItems: (state) => [...state.items].sort((a, b) => a.year - b.year || a.visualName.localeCompare(b.visualName)),
     itemsCount: (state) => state.items.length,
-    doveCount: (state) => state.items.filter(item => item.type === 'Dove').length,
-    hawkCount: (state) => state.items.filter(item => item.type === 'Hawk').length,
+    doveCount: (state) => state.items.filter(item => item.type === 'DOVE').length,
+    hawkCount: (state) => state.items.filter(item => item.type === 'HAWK').length,
     
     // Year navigation getters
     currentYearItems: (state) => state.currentYear ? state.items.filter(item => item.year === state.currentYear) : [],
@@ -92,34 +92,19 @@ export const useArchiveStore = defineStore('archive', {
       this.error = null;
       
       try {
-        const { data } = Papa.parse(itemsData, {
-          header: true,
-          skipEmptyLines: true,
-        });
+        const response = await fetch('/shalom/data/items.csv');
+        if (!response.ok) throw new Error(`HTTP error! status: ${response.status}`);
+        const csvText = await response.text();
         
-        this.items = data.map(row => {
-          const tags = row.Tags ? 
-            row.Tags.split(/[\n,]/)
-              .map(tag => tag.trim())
-              .filter(Boolean) : 
-            [];
-
-          // Just look for the filename itself
-          const searchName = row.VisualName.toLowerCase();
-          const filePath = Object.keys(mediaFiles).find(filename => 
-            filename.includes(searchName)
-          );
-
-          return {
-            visualName: row.VisualName,
-            type: row.Type,
-            headline: row.Headline,
-            text: row.Text || '',
-            tags,
-            year: parseInt(row.Year),
-            filePath: filePath ? mediaFiles[filePath] : ''
-          };
-        });
+        const { data } = Papa.parse(csvText, { header: true });
+        
+        this.items = data.map(row => ({
+          visualName: row.visualName || '',
+          type: row.type || '',
+          headline: row.headline || '',
+          year: parseInt(row.year) || 0,
+          filePath: row.filePath ? `/shalom/data/1979/${row.type?.toLowerCase()}/${row.filePath}` : ''
+        }));
 
         if (!this.currentYear && this.items.length) {
           this.currentYear = Math.min(...this.items.map(item => item.year));
