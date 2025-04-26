@@ -1,15 +1,6 @@
 import { defineStore } from 'pinia'
 import Papa from 'papaparse'
 
-// Import media files with correct base path
-const mediaFiles = Object.fromEntries(
-  Object.entries(import.meta.glob('/data/**/*.{mp4,png,jpg,jpeg,webm}', { eager: true }))
-    .map(([key, value]) => {
-      const filename = key.split('/').pop();
-      return [filename?.toLowerCase(), key];
-    })
-);
-
 // Import CSV data
 import itemsData from '/data/items.csv?raw'
 
@@ -98,13 +89,17 @@ export const useArchiveStore = defineStore('archive', {
         
         const { data } = Papa.parse(csvText, { header: true });
         
-        this.items = data.map(row => ({
-          visualName: row.VisualName || '',
-          type: row.Type || '',
-          headline: row.Headline || '',
-          year: parseInt(row.Year) || 0,
-          filePath: row.FilePath ? `/shalom/data/1979/${row.Type?.toLowerCase()}/${row.FilePath}` : ''
-        }));
+        this.items = data.map(row => {
+          const ext = row.VisualName?.includes('8') ? '.png' : '.mp4';
+          return {
+            visualName: row.VisualName || '',
+            type: row.Type || '',
+            headline: row.Headline || '',
+            year: parseInt(row.Year) || 0,
+            filePath: row.VisualName && row.Year ? 
+              `/shalom/data/${row.Year}/${row.Type?.toLowerCase()}/${row.VisualName}${ext}` : ''
+          };
+        });
 
         if (!this.currentYear && this.items.length) {
           this.currentYear = Math.min(...this.items.map(item => item.year));

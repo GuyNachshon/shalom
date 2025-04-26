@@ -42,7 +42,9 @@ export default defineConfig({
           // Handle media files
           if (['mp4', 'png'].includes(ext)) {
             const type = assetInfo.name?.includes('DOVE') ? 'dove' : 'hawk';
-            return `data/1979/${type}/[name][extname]`;
+            const dirPath = assetInfo.name?.split('/');
+            const year = dirPath?.length > 1 ? dirPath[0] : '1979';
+            return `data/${year}/${type}/[name][extname]`;
           }
 
           return `assets/[name]-[hash][extname]`;
