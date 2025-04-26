@@ -99,11 +99,11 @@ export const useArchiveStore = defineStore('archive', {
         const { data } = Papa.parse(csvText, { header: true });
         
         this.items = data.map(row => ({
-          visualName: row.visualName || '',
-          type: row.type || '',
-          headline: row.headline || '',
-          year: parseInt(row.year) || 0,
-          filePath: row.filePath ? `/shalom/data/1979/${row.type?.toLowerCase()}/${row.filePath}` : ''
+          visualName: row.VisualName || '',
+          type: row.Type || '',
+          headline: row.Headline || '',
+          year: parseInt(row.Year) || 0,
+          filePath: row.FilePath ? `/shalom/data/1979/${row.Type?.toLowerCase()}/${row.FilePath}` : ''
         }));
 
         if (!this.currentYear && this.items.length) {

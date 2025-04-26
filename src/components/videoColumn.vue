@@ -16,7 +16,7 @@ const items = ref([]);
 
 // Update items when store changes
 watch(() => archiveStore.items, () => {
-    items.value = props.itemType === 'Dove' ? archiveStore.doveItems : archiveStore.hawkItems;
+    items.value = props.itemType.toUpperCase() === 'DOVE' ? archiveStore.doveItems : archiveStore.hawkItems;
 }, { immediate: true });
 
 const currentItem = ref(null);
