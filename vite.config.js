@@ -20,11 +20,12 @@ export default defineConfig({
       },
       output: {
         assetFileNames: (assetInfo) => {
-          // Keep data directory structure
-          if (assetInfo.source?.toString().includes('data/')) {
-            return '[name][extname]';
+          const filepath = assetInfo.source?.toString() || '';
+          const dataMatch = filepath.match(/data\/(.+)$/);
+          if (dataMatch) {
+            // Preserve full path for data directory files
+            return dataMatch[0];
           }
-          // Other assets go to assets directory
           return 'assets/[name]-[hash][extname]';
         },
       },
