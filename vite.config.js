@@ -10,7 +10,8 @@ export default defineConfig({
       '@': '/src',
     },
   },
-  assetsInclude: ['**/*.csv'],
+  assetsInclude: ['**/*.csv', '**/*.mp4', '**/*.png'],
+  publicDir: 'data',
   build: {
     outDir: 'dist',
     copyPublicDir: true,
@@ -20,13 +21,13 @@ export default defineConfig({
       },
       output: {
         assetFileNames: (assetInfo) => {
-          const filepath = assetInfo.source?.toString() || '';
-          const dataMatch = filepath.match(/data\/(.+)$/);
-          if (dataMatch) {
-            // Preserve full path for data directory files
-            return dataMatch[0];
+          // Skip files that are handled by copyPublicDir
+          if (assetInfo.name?.includes('node_modules') || 
+              assetInfo.name?.includes('src/assets')) {
+            return 'assets/[name]-[hash][extname]';
           }
-          return 'assets/[name]-[hash][extname]';
+          // Keep original path for everything else
+          return '[name][extname]';
         },
       },
     },
