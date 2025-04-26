@@ -1,11 +1,14 @@
 import { defineStore } from 'pinia'
 import Papa from 'papaparse'
 
-// Import media files
+// Import media files with correct base path
 const mediaFiles = Object.fromEntries(
   Object.entries(import.meta.glob('/data/**/*.{mp4,png,jpg,jpeg,webm}', { eager: true }))
     .map(([key, value]) => [key.toLowerCase(), key])
 );
+
+// Import CSV data
+import itemsData from '/data/items.csv?raw'
 
 export const useArchiveStore = defineStore('archive', {
   state: () => ({
@@ -86,10 +89,7 @@ export const useArchiveStore = defineStore('archive', {
       this.error = null;
       
       try {
-        const response = await fetch('/items.csv');
-        const csvText = await response.text();
-        
-        const { data } = Papa.parse(csvText, {
+        const { data } = Papa.parse(itemsData, {
           header: true,
           skipEmptyLines: true,
         });
