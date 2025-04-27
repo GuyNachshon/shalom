@@ -105,8 +105,8 @@ export const useArchiveStore = defineStore('archive', {
           const searchName = row.VisualName.toLowerCase();
           const searchType = row.Type.toLowerCase();
           const filePath = Object.keys(mediaFiles).find(path => 
-            path.includes(`/${searchType}/`) && 
-            path.includes(searchName)
+            path.toLowerCase().includes(`/${searchType}/`) && 
+            path.toLowerCase().includes(searchName)
           );
 
           return {
