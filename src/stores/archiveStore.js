@@ -1,8 +1,11 @@
 import { defineStore } from 'pinia'
 import Papa from 'papaparse'
 
-// Import CSV data
-import itemsData from '/data/items.csv?raw'
+// Import media files with correct base path
+const mediaFiles = Object.fromEntries(
+  Object.entries(import.meta.glob('/data/**/*.{mp4,png,jpg,jpeg,webm}', { eager: true }))
+    .map(([key, value]) => [key.toLowerCase(), key])
+);
 
 export const useArchiveStore = defineStore('archive', {
   state: () => ({
@@ -14,16 +17,16 @@ export const useArchiveStore = defineStore('archive', {
   }),
   
   getters: {
-    doveItems: (state) => state.items.filter(item => item.type === 'DOVE'),
-    hawkItems: (state) => state.items.filter(item => item.type === 'HAWK'),
+    doveItems: (state) => state.items.filter(item => item.type === 'Dove'),
+    hawkItems: (state) => state.items.filter(item => item.type === 'Hawk'),
     itemsByYear: (state) => (year) => state.items.filter(item => item.year === year),
     itemsByTag: (state) => (tag) => state.items.filter(item => item.tags.includes(tag)),
     years: (state) => [...new Set(state.items.map(item => item.year))].sort(),
     allTags: (state) => [...new Set(state.items.flatMap(item => item.tags))].sort(),
     sortedItems: (state) => [...state.items].sort((a, b) => a.year - b.year || a.visualName.localeCompare(b.visualName)),
     itemsCount: (state) => state.items.length,
-    doveCount: (state) => state.items.filter(item => item.type === 'DOVE').length,
-    hawkCount: (state) => state.items.filter(item => item.type === 'HAWK').length,
+    doveCount: (state) => state.items.filter(item => item.type === 'Dove').length,
+    hawkCount: (state) => state.items.filter(item => item.type === 'Hawk').length,
     
     // Year navigation getters
     currentYearItems: (state) => state.currentYear ? state.items.filter(item => item.year === state.currentYear) : [],
@@ -83,21 +86,37 @@ export const useArchiveStore = defineStore('archive', {
       this.error = null;
       
       try {
-        const response = await fetch('/shalom/data/items.csv');
-        if (!response.ok) throw new Error(`HTTP error! status: ${response.status}`);
+        const response = await fetch('/data/items.csv');
         const csvText = await response.text();
-        
-        const { data } = Papa.parse(csvText, { header: true });
+        const { data } = Papa.parse(csvText, {
+          header: true,
+          skipEmptyLines: true,
+        });
         
         this.items = data.map(row => {
-          const ext = row.VisualName?.includes('8') ? '.png' : '.mp4';
+          // Parse tags - they might be in multiple lines in the CSV
+          const tags = row.Tags ? 
+            row.Tags.split(/[\n,]/)
+              .map(tag => tag.trim())
+              .filter(Boolean) : 
+            [];
+
+          // Find matching media file
+          const searchName = row.VisualName.toLowerCase();
+          const searchType = row.Type.toLowerCase();
+          const filePath = Object.keys(mediaFiles).find(path => 
+            path.includes(`/${searchType}/`) && 
+            path.includes(searchName)
+          );
+
           return {
-            visualName: row.VisualName || '',
-            type: row.Type || '',
-            headline: row.Headline || '',
-            year: parseInt(row.Year) || 0,
-            filePath: row.VisualName && row.Year ? 
-              `/shalom/data/${row.Year}/${row.Type?.toLowerCase()}/${row.VisualName}${ext}` : ''
+            visualName: row.VisualName,
+            type: row.Type,
+            headline: row.Headline,
+            text: row.Text || '',
+            tags,
+            year: parseInt(row.Year),
+            filePath: filePath ? mediaFiles[filePath] : ''
           };
         });
 

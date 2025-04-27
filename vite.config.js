@@ -4,52 +4,10 @@ import vue from '@vitejs/plugin-vue'
 // https://vite.dev/config/
 export default defineConfig({
   plugins: [vue()],
-  base: '/shalom/',
   resolve: {
     alias: {
       '@': '/src',
     },
   },
-  assetsInclude: ['**/*.csv', '**/*.mp4', '**/*.png', '**/*.woff2'],
-  build: {
-    outDir: 'dist',
-    copyPublicDir: true,
-    rollupOptions: {
-      input: {
-        main: 'index.html',
-      },
-      output: {
-        assetFileNames: (assetInfo) => {
-          const info = assetInfo.name?.split('.');
-          const ext = info?.[info.length - 1] ?? '';
-
-          // Handle CSV files
-          if (ext === 'csv') {
-            return `data/[name][extname]`;
-          }
-
-          // Handle fonts
-          if (ext === 'woff2') {
-            return `assets/fonts/[name][extname]`;
-          }
-
-          // Handle other assets
-          if (assetInfo.name?.includes('node_modules') || 
-              assetInfo.name?.includes('src/assets')) {
-            return `assets/[name]-[hash][extname]`;
-          }
-
-          // Handle media files
-          if (['mp4', 'png'].includes(ext)) {
-            const type = assetInfo.name?.includes('DOVE') ? 'dove' : 'hawk';
-            const dirPath = assetInfo.name?.split('/');
-            const year = dirPath?.length > 1 ? dirPath[0] : '1979';
-            return `data/${year}/${type}/[name][extname]`;
-          }
-
-          return `assets/[name]-[hash][extname]`;
-        },
-      },
-    },
-  },
+  base: '/shalom/'
 })
