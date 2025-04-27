@@ -116,7 +116,7 @@ export const useArchiveStore = defineStore('archive', {
             text: row.Text || '',
             tags,
             year: parseInt(row.Year),
-            filePath: filePath ? mediaFiles[filePath] : ''
+            filePath: filePath ? `${import.meta.env.BASE_URL}${filePath.replace(/^\//, '')}` : ''
           };
         });
 
