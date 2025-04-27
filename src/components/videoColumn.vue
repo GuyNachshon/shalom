@@ -160,6 +160,7 @@ const goToItem = (index) => {
 
 <style scoped lang="scss">
 @use "../assets/styles/variables" as *;
+@use "../assets/styles/mixins" as *;
 
 .column {
     display: flex;
@@ -176,6 +177,18 @@ const goToItem = (index) => {
     overflow: hidden;
     background: rgba(0, 0, 0, 0.2);
     position: relative;
+    
+    @include responsive($breakpoint-laptop) {
+        height: 500px;
+    }
+
+    @include responsive($breakpoint-tablet-landscape) {
+        height: 400px;
+    }
+
+    @include responsive($breakpoint-tablet-portrait) {
+        height: 300px;
+    }
 }
 
 .media {
