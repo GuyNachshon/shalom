@@ -102,11 +102,11 @@ export const useArchiveStore = defineStore('archive', {
             [];
 
           // Find matching media file
-          const searchName = row.VisualName.toLowerCase();
-          const searchType = row.Type.toLowerCase();
+          const searchName = row.VisualName;
+          const searchType = row.Type.toUpperCase();
           const filePath = Object.keys(mediaFiles).find(path => 
-            path.toLowerCase().includes(`/${searchType}/`) && 
-            path.toLowerCase().includes(searchName)
+            path.includes(`/${searchType}/`) && 
+            path.includes(searchName)
           );
 
           return {
