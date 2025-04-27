@@ -86,7 +86,7 @@ export const useArchiveStore = defineStore('archive', {
       this.error = null;
       
       try {
-        const response = await fetch('/data/items.csv');
+        const response = await fetch(`${import.meta.env.BASE_URL}data/items.csv`);
         const csvText = await response.text();
         const { data } = Papa.parse(csvText, {
           header: true,
